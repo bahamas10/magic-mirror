@@ -1,0 +1,472 @@
+<!--
+Author: Dave Eddy <dave@daveeddy.com>
+Date: July 22, 2016
+License: MIT
+-->
+<!doctype html>
+<html lang="en">
+	<head>
+		<title>Mirror Pi</title>
+		<style>
+			* {
+				margin: 0;
+				padding: 0;
+				box-sizing: border-box;
+			}
+			body {
+				background: #000;
+				color: #fff;
+				font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+				padding-top: 5px;
+			}
+
+			ul {
+				list-style: none;
+			}
+
+			#pushover {
+				width: 350px;
+				color: #bbb;
+			}
+			#pushover strong {
+				color: #fff;
+			}
+			#saver {
+				z-index: 999;
+				position: relative;
+				right: 0;
+				left: 0;
+			}
+
+			div.block {
+				margin: 20px;
+			}
+
+			.float-right {
+				float: right;
+			}
+			.float-left {
+				float: left;
+			}
+			.clear-both {
+				clear: both;
+			}
+
+			/* time */
+			#date {
+				position: relative;
+			}
+			#date-weekday {
+				font-size: 36px;
+			}
+			#date-date {
+				font-size: 24px;
+			}
+			#date-time {
+				font-size: 62px;
+			}
+
+			/* weather */
+			@font-face {
+				font-family: 'weather';
+				src: url('/assets/weather-font/artill_clean_icons-webfont.eot');
+				src: url('/assets/weather-font/artill_clean_icons-webfont-iefix.eot') format('embedded-opentype'),
+					url('/assets/weather-font/artill_clean_icons-webfont.woff') format('woff'),
+					url('/assets/weather-font/artill_clean_icons-webfont.ttf') format('truetype'),
+					url('/assets/weather-font/artill_clean_icons-webfont.svg') format('svg');
+				font-weight: normal;
+				font-style: normal;
+			}
+
+			i {
+				margin-top: -40px;
+				color: #fff;
+				font-family: weather;
+				font-size: 150px;
+				font-weight: normal;
+				font-style: normal;
+				line-height: 1.0;
+				text-transform: none;
+			}
+
+			#weather table {
+				text-align: center;
+				border-collapse: collapse;
+			}
+			#weather table, #weather td {
+				border: 1px solid white;
+				min-width: 70px;
+			}
+
+			#weather table i {
+				font-size: 50px;
+			}
+
+			#weather .low {
+				color: #bbb;
+			}
+
+			.icon-0:before { content: ":"; }
+			.icon-1:before { content: "p"; }
+			.icon-2:before { content: "S"; }
+			.icon-3:before { content: "Q"; }
+			.icon-4:before { content: "S"; }
+			.icon-5:before { content: "W"; }
+			.icon-6:before { content: "W"; }
+			.icon-7:before { content: "W"; }
+			.icon-8:before { content: "W"; }
+			.icon-9:before { content: "I"; }
+			.icon-10:before { content: "W"; }
+			.icon-11:before { content: "I"; }
+			.icon-12:before { content: "I"; }
+			.icon-13:before { content: "I"; }
+			.icon-14:before { content: "I"; }
+			.icon-15:before { content: "W"; }
+			.icon-16:before { content: "I"; }
+			.icon-17:before { content: "W"; }
+			.icon-18:before { content: "U"; }
+			.icon-19:before { content: "Z"; }
+			.icon-20:before { content: "Z"; }
+			.icon-21:before { content: "Z"; }
+			.icon-22:before { content: "Z"; }
+			.icon-23:before { content: "Z"; }
+			.icon-24:before { content: "E"; }
+			.icon-25:before { content: "E"; }
+			.icon-26:before { content: "3"; }
+			.icon-27:before { content: "a"; }
+			.icon-28:before { content: "A"; }
+			.icon-29:before { content: "a"; }
+			.icon-30:before { content: "A"; }
+			.icon-31:before { content: "6"; }
+			.icon-32:before { content: "1"; }
+			.icon-33:before { content: "6"; }
+			.icon-34:before { content: "1"; }
+			.icon-35:before { content: "W"; }
+			.icon-36:before { content: "1"; }
+			.icon-37:before { content: "S"; }
+			.icon-38:before { content: "S"; }
+			.icon-39:before { content: "S"; }
+			.icon-40:before { content: "M"; }
+			.icon-41:before { content: "W"; }
+			.icon-42:before { content: "I"; }
+			.icon-43:before { content: "W"; }
+			.icon-44:before { content: "a"; }
+			.icon-45:before { content: "S"; }
+			.icon-46:before { content: "U"; }
+			.icon-47:before { content: "S"; }
+
+
+
+			/* clock */
+			.hero-circle {
+				width:220px;
+				height:220px;
+				position:relative;
+				border:4px solid #ffffff;
+				border-radius:50%;
+				box-shadow:0 1px 8px rgba(34, 34, 34, 0.3),inset 0 1px 8px rgba(34, 34, 34, 0.3);
+			}
+			.hero-face{
+				width:100%;
+				height:100%;
+			}
+			.hero-face:after{
+				position:absolute;
+				top:50%;
+				left:50%;
+				width:12px;
+				height:12px;
+				margin:-6px 0 0 -6px;
+				background:#ffffff;
+				border-radius:6px;
+				content:"";
+				display:block;
+			}
+			.hero-hour{
+				width:0;
+				height:0;
+				position:absolute;
+				top:50%;
+				left:50%;
+				margin:-4px 0 -4px -25%;
+				padding:2px 0 2px 25%;
+				background:#fff;
+				-webkit-transform-origin:100% 50%;
+				-ms-transform-origin:100% 50%;
+				transform-origin:100% 50%;
+				border-radius:4px 0 0 4px;
+			}
+			.hero-minute{
+				width:0;
+				height:0;
+				position:absolute;
+				top:50%;
+				left:50%;
+				margin:-40% -3px 0;
+				padding:40% 2px 0;
+				background:#fff;
+				-webkit-transform-origin:50% 100%;
+				-ms-transform-origin:50% 100%;
+				transform-origin:50% 100%;
+				border-radius:3px 3px 0 0;
+			}
+			.hero-second{
+				width:0;
+				height:0;
+				position:absolute;
+				top:50%;
+				left:50%;
+				margin:-40% -1px 0 0;
+				padding:40% 1px 0;
+				background:#fff;
+				-webkit-transform-origin:50% 100%;
+				-ms-transform-origin:50% 100%;
+				transform-origin:50% 100%;
+			}
+		</style>
+		<script src="/assets/moment.min.js"></script>
+		<script src="/assets/jquery-2.2.3.min.js"></script>
+		<script src="/assets/jquery.simpleWeather.min.js"></script>
+		<script>
+			// force reload the page every day
+			setTimeout(function () {
+				window.location.reload();
+			}, 24 * 60 * 60 * 1000);
+
+			$(document).on('ready', function () {
+				doPushover();
+				doClock();
+				updateWeather();
+				doDate();
+				doGarage();
+			});
+
+			function doPushover() {
+				var pushoverDiv = document.getElementById('pushover');
+
+				function updatePushover() {
+					$.getJSON('http://mirror-pi.rapture.com:8085/messages.json', function (data) {
+						var ul = document.createElement('ul');
+						data.sort(function (a, b) {
+							return a.date > b.date ? -1 : 1;
+						});
+						for (var i = 0; i < 5; i++) {
+							var msg = data[i];
+							if (!msg)
+								continue;
+							var d = new Date(msg.date * 1000);
+							var li = document.createElement('li');
+							var strong = document.createElement('strong');
+							strong.textContent = '[' + human(d) + '] ';
+							li.appendChild(strong);
+							var span = document.createElement('span');
+							span.textContent = msg.title + ' - ' + msg.message;
+							li.appendChild(span);
+							ul.appendChild(li);
+						}
+						pushoverDiv.innerHTML = '';
+						pushoverDiv.appendChild(ul);
+						setTimeout(updatePushover, 15 * 1000);
+					});
+				}
+				updatePushover();
+			}
+
+			function doClock() {
+				var $hour = $('#hour');
+				var $minute = $('#minute');
+				var $second = $('#second');
+
+				function updateClock() {
+					var now = moment();
+					var second = now.seconds() * 6;
+					var minute = now.minutes() * 6 + second / 60;
+					var hour = ((now.hours() % 12) / 12) * 360 + 90 + minute / 12;
+					$hour.css('transform', 'rotate(' + hour + 'deg)');
+					$minute.css('transform', 'rotate(' + minute + 'deg)');
+					$second.css('transform', 'rotate(' + second + 'deg)');
+					setTimeout(updateClock, 1000);
+				}
+				updateClock();
+			}
+
+			function updateWeather() {
+				var days = 5;
+
+				$.simpleWeather({
+					location: 'Clarence, NY',
+					woeid: '',
+					unit: 'f',
+					success: function(weather) {
+						var span, div, icon;
+						var $weather = $('#weather');
+						$weather.empty();
+
+						// current
+						div = document.createElement('div');
+						div.className = 'current';
+
+						icon = document.createElement('i');
+						icon.className = 'icon-' + weather.code + ' float-left';
+						div.appendChild(icon);
+
+						span = document.createElement('span');
+						span.textContent = weather.city + ', ' + weather.region;
+						div.appendChild(span);
+
+						div.appendChild(document.createElement('br'));
+
+						span = document.createElement('span');
+						span.textContent = weather.temp;
+						span.innerHTML = span.innerHTML + '&deg; - ';
+						div.appendChild(span);
+
+						span = document.createElement('span');
+						span.textContent = weather.currently;
+						div.appendChild(span);
+
+						div.appendChild(document.createElement('br'));
+
+						span = document.createElement('span');
+						span.className = 'high';
+						span.textContent = 'High ' + weather.high;
+						span.innerHTML = span.innerHTML + '&deg; / ';
+						div.appendChild(span);
+
+						span = document.createElement('span');
+						span.className = 'low';
+						span.textContent = weather.low;
+						span.innerHTML = 'Low ' + span.innerHTML + '&deg; ';
+						div.appendChild(span);
+
+						$weather.append(div);
+
+						// forecast
+						var table = document.createElement('table');
+						var tr = document.createElement('tr');
+						for (var i = 1; i <= days; i++) {
+							var td = document.createElement('td');
+							var fc = weather.forecast[i];
+
+							div = document.createElement('div');
+							div.textContent = fc.day;
+							div.className = 'day';
+							td.appendChild(div);
+
+							icon = document.createElement('i');
+							icon.className = 'icon-' + fc.code;
+							td.appendChild(icon);
+
+							div = document.createElement('div');
+
+							span = document.createElement('span');
+							span.className = 'high';
+							span.textContent = fc.high;
+							span.innerHTML = span.innerHTML + '&deg; ';
+							div.appendChild(span);
+
+							span = document.createElement('span');
+							span.className = 'low';
+							span.textContent = fc.low;
+							span.innerHTML = span.innerHTML + '&deg; ';
+							div.appendChild(span);
+
+							td.appendChild(div);
+
+							tr.appendChild(td);
+						}
+						table.appendChild(tr);
+						$weather.append(table);
+
+						setTimeout(updateWeather, 60 * 60 * 1000);
+
+						console.log(weather);
+					},
+					error: function(error) {
+						$("#weather").html('<p>'+error+'</p>');
+						setTimeout(updateWeather, 5 * 60 * 1000);
+					}
+				});
+			}
+
+			function doDate() {
+				var weekdaySpan = document.getElementById('date-weekday');
+				var dateSpan = document.getElementById('date-date');
+				var timeSpan = document.getElementById('date-time');
+
+				function updateDate() {
+					var now = moment();
+					weekdaySpan.textContent = now.format('dddd');
+					dateSpan.textContent = now.format('MMMM Do, YYYY');
+					timeSpan.textContent = now.format('h:mm a');
+					setTimeout(updateDate, 1000);
+				}
+				updateDate();
+			}
+
+			function doGarage() {
+				var garageDoorDiv = document.getElementById('garage-door');
+
+				function updateGarage() {
+					$.getJSON('http://garage-pi.rapture.com:10500/state', function (data) {
+						var state = data.open ? 'open' : 'closed';
+						garageDoorDiv.innerHTML = 'Garage is <strong>' + state + '</strong>';
+						setTimeout(updateGarage, 10 * 1000);
+					});
+				}
+				updateGarage();
+			}
+
+			function human(seconds) {
+				if (seconds instanceof Date)
+					seconds = Math.round((Date.now() - seconds) / 1000);
+				var suffix = seconds < 0 ? 'from now' : 'ago';
+				seconds = Math.abs(seconds);
+
+				var times = [
+					seconds / 60 / 60 / 24 / 365, // years
+					seconds / 60 / 60 / 24 / 30,  // months
+					seconds / 60 / 60 / 24 / 7,   // weeks
+					seconds / 60 / 60 / 24,       // days
+					seconds / 60 / 60,            // hours
+					seconds / 60,                 // minutes
+					seconds                       // seconds
+				];
+				var names = ['year', 'month', 'week', 'day', 'hour', 'minute', 'second'];
+
+				for (var i = 0; i < names.length; i++) {
+					var time = Math.floor(times[i]);
+					if (time > 1)
+						return time + ' ' + names[i] + 's ' + suffix;
+					else if (time === 1)
+						return time + ' ' + names[i] + ' ' + suffix;
+				}
+				return '0 seconds ' + suffix;
+			}
+		</script>
+	</head>
+	<body>
+		<!--
+		<div id="saver">
+			<hr style="border: 4px solid red;" />
+			<hr style="border: 4px solid green;" />
+			<hr style="border: 4px solid blue;" />
+		</div>
+		-->
+		<div class="block float-right clear-both" id="weather"></div>
+		<div class="block float-right clear-both" id="garage-door"></div>
+		<div class="block float-right clear-both" id="pushover"></div>
+		<div class="block" id="date">
+			<span id="date-weekday"></span><br />
+			<span id="date-date"></span><br />
+			<span id="date-time"></span>
+		</div>
+		<div class="block hero-circle">
+			<div class="hero-face">
+				<div id="hour" class="hero-hour"></div>
+				<div id="minute" class="hero-minute"></div>
+				<div id="second" class="hero-second"></div>
+			</div>
+		</div>
+	</body>
+</html>
