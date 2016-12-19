@@ -24,6 +24,24 @@ License: MIT
 				list-style: none;
 			}
 
+			#bottom {
+				position: absolute;
+				right: 0;
+				left: 0;
+				bottom: 0;
+				z-index: -1;
+				text-align: center;
+				font-size: 48px;
+			}
+
+			img.gif {
+				margin-top: 7px;
+				position: relative;
+				display: block;
+				width: 100%;
+				opacity: 0.2;
+			}
+
 			#pushover {
 				width: 350px;
 				color: #bbb;
@@ -239,6 +257,7 @@ License: MIT
 				updateWeather();
 				doDate();
 				doGarage();
+				doCountdown();
 			});
 
 			function doPushover() {
@@ -270,6 +289,23 @@ License: MIT
 					});
 				}
 				updatePushover();
+			}
+
+			function doCountdown() {
+				var $text = $('#bottom span.text');
+
+				function updateCountdown() {
+					var daysleft = Math.ceil((new Date(2016, 11, 25) - Date.now()) / 1000 / 60 / 60 / 24);
+					var text;
+					if (daysleft > 0)
+						text = daysleft + ' Days Until Christmas';
+					else
+						text = 'Merry Christmas!';
+					$text.text(text);
+
+					setTimeout(updateCountdown, 60 * 1000);
+				}
+				updateCountdown();
 			}
 
 			function doClock() {
@@ -467,6 +503,11 @@ License: MIT
 				<div id="minute" class="hero-minute"></div>
 				<div id="second" class="hero-second"></div>
 			</div>
+		</div>
+
+		<div id="bottom">
+			<span class="text"></span>
+			<img class="gif" src="yule.gif" />
 		</div>
 	</body>
 </html>
