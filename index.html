@@ -295,9 +295,11 @@ License: MIT
 				var $text = $('#bottom span.text');
 
 				function updateCountdown() {
-					var daysleft = Math.ceil((new Date(2016, 11, 25) - Date.now()) / 1000 / 60 / 60 / 24);
+					var now = new Date();
+					var year = now.getFullYear();
+					var daysleft = Math.ceil((new Date(year, 11, 25) - now.getTime()) / 1000 / 60 / 60 / 24);
 					var text;
-					if (daysleft > 0)
+					if (daysleft > 0 && dayleft < 31)
 						text = daysleft + ' Days Until Christmas';
 					else
 						text = 'Merry Christmas!';
