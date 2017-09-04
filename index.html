@@ -15,7 +15,7 @@ License: MIT
 			}
 			body {
 				background: #000;
-				color: #fff;
+				color: #f0f;
 				font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
 				padding-top: 5px;
 			}
@@ -47,7 +47,7 @@ License: MIT
 				color: #bbb;
 			}
 			#pushover strong {
-				color: #fff;
+				color: #f0f;
 			}
 			#saver {
 				z-index: 999;
@@ -180,7 +180,7 @@ License: MIT
 				width:220px;
 				height:220px;
 				position:relative;
-				border:4px solid #ffffff;
+				border:4px solid #f0f;
 				border-radius:50%;
 				box-shadow:0 1px 8px rgba(34, 34, 34, 0.3),inset 0 1px 8px rgba(34, 34, 34, 0.3);
 			}
@@ -195,7 +195,7 @@ License: MIT
 				width:12px;
 				height:12px;
 				margin:-6px 0 0 -6px;
-				background:#ffffff;
+				background:#fff;
 				border-radius:6px;
 				content:"";
 				display:block;
@@ -208,7 +208,7 @@ License: MIT
 				left:50%;
 				margin:-4px 0 -4px -25%;
 				padding:2px 0 2px 25%;
-				background:#fff;
+				background:#f0f;
 				-webkit-transform-origin:100% 50%;
 				-ms-transform-origin:100% 50%;
 				transform-origin:100% 50%;
@@ -222,7 +222,7 @@ License: MIT
 				left:50%;
 				margin:-40% -3px 0;
 				padding:40% 2px 0;
-				background:#fff;
+				background:#f0f;
 				-webkit-transform-origin:50% 100%;
 				-ms-transform-origin:50% 100%;
 				transform-origin:50% 100%;
@@ -236,7 +236,7 @@ License: MIT
 				left:50%;
 				margin:-40% -1px 0 0;
 				padding:40% 1px 0;
-				background:#fff;
+				background:#f0f;
 				-webkit-transform-origin:50% 100%;
 				-ms-transform-origin:50% 100%;
 				transform-origin:50% 100%;
@@ -258,6 +258,7 @@ License: MIT
 				doDate();
 				doGarage();
 				doCountdown();
+				doFade();
 			});
 
 			function doPushover() {
@@ -299,10 +300,12 @@ License: MIT
 					var year = now.getFullYear();
 					var daysleft = Math.ceil((new Date(year, 11, 25) - now.getTime()) / 1000 / 60 / 60 / 24);
 					var text;
-					if (daysleft > 0 && dayleft < 31)
+					if (daysleft < 0)
+						text = 'Merry Christmas!';
+					else if (daysleft < 31)
 						text = daysleft + ' Days Until Christmas';
 					else
-						text = 'Merry Christmas!';
+						text = '';
 					$text.text(text);
 
 					setTimeout(updateCountdown, 60 * 1000);
@@ -453,6 +456,42 @@ License: MIT
 					});
 				}
 				updateGarage();
+			}
+
+			function doFade() {
+				var colors = ['red', 'orange', 'yellow', 'green', 'blue', 'indigo', 'violet'];
+				var elems = [
+					[getCSSRule('body'), 'color'],
+					[getCSSRule('#pushover strong'), 'color'],
+					[getCSSRule('.hero-circle'), 'border-color'],
+					[getCSSRule('.hero-hour'), 'background'],
+					[getCSSRule('.hero-minute'), 'background'],
+					[getCSSRule('.hero-second'), 'background'],
+				];
+
+				var i = 0;
+
+				function updateFade() {
+					i = (i + 1) % colors.length;
+					elems.forEach(function (o) {
+						var elem = o[0];
+						var prop = o[1];
+						elem.style[prop] = colors[i];
+						elem.style.transition = prop + ' 7s';
+					});
+					setTimeout(updateFade, 10 * 1000);
+				}
+				updateFade();
+			}
+
+			function getCSSRule(selector) {
+				var rules = document.styleSheets[0].rules;
+				for (var i = 0; i < rules.length; i++) {
+					var rule = rules[i];
+					if ((rule.selectorText || '').toLowerCase() === selector)
+						return rule;
+				}
+				return null;
 			}
 
 			function human(seconds) {
