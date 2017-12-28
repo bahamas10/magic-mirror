@@ -1,0 +1,149 @@
+<!--
+Author: Dave Eddy <dave@daveeddy.com>
+Date: July 22, 2016
+License: MIT
+-->
+<!doctype html>
+<html lang="en">
+	<head>
+		<title>Crypto</title>
+		<meta name=viewport content="width=device-width, initial-scale=1">
+		<style>
+			* {
+				margin: 0;
+				padding: 0;
+				box-sizing: border-box;
+			}
+			body {
+				width: 100%;
+				background: #000;
+				color: #f0f;
+				padding: 5px;
+				font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+			}
+
+			.container {
+				margin-right: auto;
+				margin-left: auto;
+				max-width: 800px;
+			}
+
+			.red {
+				color: red;
+			}
+			.green {
+				color: #51ff51;
+			}
+			#crypto {
+				color: #bbb;
+				font-size: 12px;
+				text-align: right;
+			}
+			#crypto strong {
+				color: #f0f;
+			}
+		</style>
+		<script src="/assets/jquery-2.2.3.min.js"></script>
+		<script src="/crypto.js"></script>
+		<script>
+			// force reload the page every day
+			setTimeout(function () {
+				window.location.reload();
+			}, 24 * 60 * 60 * 1000);
+
+			$(document).on('ready', function () {
+				doCrypto();
+			});
+
+			function doCrypto() {
+				var cryptoDiv = document.getElementById('crypto');
+				var pre = document.createElement('pre');
+				var code = document.createElement('code');
+
+				pre.appendChild(code);
+				cryptoDiv.appendChild(pre);
+
+				var amounts = CRYPTO_AMOUNTS;
+
+				function commas(s) {
+					s = s.split('.');
+					s[0] = s[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+					return s.join('.');
+				}
+
+				function updateCrypto() {
+					console.log('updateCrypto called');
+					$.getJSON('https://api.coinmarketcap.com/v1/ticker/?limit=200', function (data) {
+						if (!Array.isArray(data)) {
+							console.log('failed to get ticker data');
+							console.log(data);
+							setTimeout(updateCrypto, 15 * 60 * 1000);
+							return;
+						}
+						var rates = {};
+						data.forEach(function (o) {
+							rates[o.symbol] = o.price_usd;
+						});
+						console.log(rates);
+
+						var arr = [
+						`${new Date().toISOString()}`
+						];
+						var totals = {}
+						var initials = {};
+						Object.keys(amounts).forEach(function (currency) {
+							var conversion = parseFloat(rates[currency]);
+							arr.push('<strong>- - - - - - - - - - -</strong>');
+							var num = currency === 'KIN' ? 10 : 2;
+							arr.push(`<strong>1 ${currency} / ${commas(conversion.toFixed(num))} USD</strong>`);
+							Object.keys(amounts[currency]).forEach(function (name) {
+								var o = amounts[currency][name];
+								var init = o[0];
+								var cur = o[1];
+								var usd = cur * conversion;
+								var diff = usd - init;
+								var sign = diff < 0 ? '-' : '+';
+								diff = Math.abs(diff);
+								var roi = commas((0 - ((init - usd) / init * 100)).toFixed(2));
+								var roiSign = roi < 0 ? '-' : '+';
+								var roiClass = roi < 0 ? 'red' : 'green';
+								roi = Math.abs(roi);
+								var approx = parseFloat(cur.toFixed(4)).toString() !== cur.toString();
+
+								totals[name] = totals[name] || 0;
+								totals[name] += usd;
+								initials[name] = initials[name] || 0;
+								initials[name] += init;
+								usd = commas(usd.toFixed(2));
+								arr.push(`${name}: ${approx ? '~' : ''}${commas(parseFloat(cur.toFixed(4)).toString())} ${currency} / ${usd} USD (${sign}$${commas(diff.toFixed(2))}, <span class="${roiClass}">${roiSign}${roi}%</span>)`);
+							});
+						});
+
+						arr.push('<strong>- - - - - - - - - - -</strong>');
+						arr.push('<strong>Total</strong>');
+						Object.keys(totals).forEach(function (name) {
+							var total = totals[name];
+							var initial = initials[name];
+							var diff = total - initial;
+							var sign = diff < 0 ? '-' : '+';
+							diff = Math.abs(diff);
+							var roi = commas((0 - ((initial - total) / initial * 100)).toFixed(2));
+							var roiSign = roi < 0 ? '-' : '+';
+							var roiClass = roi < 0 ? 'red' : 'green';
+							roi = Math.abs(roi);
+							arr.push(`${name}: $${commas(initial.toFixed(2))} =&gt; $${commas(total.toFixed(2))} (${sign}$${commas(diff.toFixed(2))}, <span class="${roiClass}">${roiSign}${roi}%</span>)`);
+						});
+						code.innerHTML = arr.join('\n');
+						setTimeout(updateCrypto, 15 * 60 * 1000);
+					});
+				}
+				updateCrypto();
+			}
+		</script>
+	</head>
+	<body>
+		<div class="container">
+			<div class="block" id="crypto"></div>
+		</div>
+	</body>
+</html>
